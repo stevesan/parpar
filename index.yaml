@@ -36,5 +36,30 @@ indexes:
   properties:
   - name: song
   - name: value
+  - name: when
     direction: desc
   - name: player
+
+- kind: ScoreEntry
+  properties:
+  - name: song
+  - name: value
+    direction: desc
+  - name: player
+
+- kind: ScoreEntry
+  properties:
+  - name: song
+  - name: value
+    direction: desc
+  - name: when
+    direction: desc
+  - name: player
+
+- kind: ScoreEntry
+  properties:
+  - name: song
+  - name: when
+    direction: desc
+  - name: player
+  - name: value

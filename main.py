@@ -1,6 +1,10 @@
 from google.appengine.ext import db
 from google.appengine.ext import webapp
 from google.appengine.ext.webapp.util import run_wsgi_app
+from datetime import datetime, timedelta
+
+class MyRequestHandler( webapp.RequestHandler ):
+	def output(self,s): self.response.out.write(s)
 
 class ScoreEntry( db.Model ):
 	player = db.StringProperty( multiline=False )
@@ -8,9 +12,9 @@ class ScoreEntry( db.Model ):
 	value = db.IntegerProperty()
 	when = db.DateTimeProperty(auto_now_add=True)
 
-class SaveScore( webapp.RequestHandler ):
-	def output(self,s): self.response.out.write(s)
+	def get_value(self): return self.value
 
+class SaveScore( MyRequestHandler ):
 	def get(self):
 		self.response.headers['Content-Type'] = 'text/html'
 		req = self.request
@@ -29,19 +33,37 @@ class SaveScore( webapp.RequestHandler ):
 
 			self.output('score = %d saved!' % value)
 	
-class GetScores( webapp.RequestHandler ):
-	def output(self,s): self.response.out.write(s)
+class GetScores( MyRequestHandler ):
 	def get(self):
 		self.response.headers['Content-Type'] = 'text/plain'
 		song = self.request.get('song')
+		limit = int(self.request.get('limit'))
+		daysago = int(self.request.get('days'))
+
+		dateClause = ''
+		results = None
+		if daysago > 0:
+			# enforce time limit
+			dt = timedelta(1)
+			now = datetime.today()
+			minWhen = now-dt
+			results = db.GqlQuery('SELECT player, value FROM ScoreEntry '
+				'WHERE song = :1 AND when >= :2 '
+				'ORDER BY when DESC LIMIT %d' % limit,\
+				song, minWhen )
+			# NOTE: Why don't we order by score value here? Because GQL doesn't allow it..yeah. It's OK - we don't expect more than 10 results, so we'll manually sort them later
+		else:
+			# all time
+			results = db.GqlQuery('SELECT player, value FROM ScoreEntry '
+				'WHERE song = :1 '
+				'ORDER BY when DESC LIMIT %d' % limit,\
+				song )
+
 		if song != '':
-			prevPlayer = ''
-			for entry in db.GqlQuery('SELECT player, value FROM ScoreEntry '
-				'WHERE song = :1 ORDER BY value DESC', song ):
-				# only show each player's highest score
-				if prevPlayer != entry.player:
-					self.output( '%s,%d|' % (entry.player, entry.value) )
-				prevPlayer = entry.player
+			# sort them by score value
+			entries = sorted( results, key=ScoreEntry.get_value, reverse=True )
+			for entry in entries:
+				self.output( '%s,%d|' % (entry.player, entry.value) )
 		else:
 			self.output('no song name given')
 
