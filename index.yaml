@@ -12,6 +12,23 @@ indexes:
 
 - kind: ScoreEntry
   properties:
+  - name: date
+  - name: song
+  - name: value
+    direction: desc
+  - name: player
+
+- kind: ScoreEntry
+  properties:
+  - name: date
+  - name: song
+  - name: value
+    direction: desc
+  - name: player
+  - name: timestamp
+
+- kind: ScoreEntry
+  properties:
   - name: player
   - name: song
   - name: value
@@ -45,7 +62,40 @@ indexes:
   - name: song
   - name: value
     direction: desc
+  - name: date
   - name: player
+
+- kind: ScoreEntry
+  properties:
+  - name: song
+  - name: value
+    direction: desc
+  - name: date
+  - name: player
+  - name: timestamp
+
+- kind: ScoreEntry
+  properties:
+  - name: song
+  - name: value
+    direction: desc
+  - name: player
+
+- kind: ScoreEntry
+  properties:
+  - name: song
+  - name: value
+    direction: desc
+  - name: player
+  - name: timestamp
+
+- kind: ScoreEntry
+  properties:
+  - name: song
+  - name: value
+    direction: desc
+  - name: player
+  - name: when
 
 - kind: ScoreEntry
   properties:
