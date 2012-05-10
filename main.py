@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 
 import md5
 
-SECRET_MD5_SALT = "iluvhorsebeatoff"
+import config
 
 class MyRequestHandler( webapp.RequestHandler ):
 	def output(self,s): self.response.out.write(s)
@@ -33,7 +33,7 @@ class SaveScore( MyRequestHandler ):
 			given_hexdigest = self.request.get('hexdigest')
 
 			# check the digest
-			expected_hexdigest = md5.new('%s%s%d%s' % (songName, playerName, value, SECRET_MD5_SALT)).hexdigest()
+			expected_hexdigest = md5.new('%s%s%d%s' % (songName, playerName, value, config.SecretMD5Salt)).hexdigest()
 			if expected_hexdigest != given_hexdigest:
 				self.output('bad MD5 hexdigest given. Score not saved. Given = '+given_hexdigest)
 			else:
