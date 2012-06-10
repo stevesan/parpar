@@ -4,7 +4,6 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from datetime import datetime, timedelta
 
 import md5
-
 import config
 
 class MyRequestHandler( webapp.RequestHandler ):
@@ -43,6 +42,26 @@ class SaveScore( MyRequestHandler ):
 				entry.value = value
 				entry.put()
 				self.output('score = %d saved!' % value)
+
+class ShowLatestScores( MyRequestHandler ):
+	def get(self):
+		self.response.headers['Content-Type'] = 'text/html'
+		try: limit = int( self.request.get('limit') )
+		except: limit = 100
+		ignorePlayer = self.request.get('ignore')
+
+		self.output('<table>')
+		for entry in db.GqlQuery('SELECT player, song, value, timestamp FROM ScoreEntry '
+			'ORDER BY timestamp DESC LIMIT %d' % limit ):
+			if entry.player != ignorePlayer:
+				self.output( '<tr>'+''.join(["<td>%s</td>" % s \
+					for s in [entry.player,
+						entry.song,
+						str(entry.value),
+						str(entry.timestamp)]
+						])
+						+ '</tr>');
+		self.output('</table>')
 	
 class GetScores( MyRequestHandler ):
 	def get(self):
@@ -68,13 +87,14 @@ class GetScores( MyRequestHandler ):
 
 		if song != '':
 			for result in results:
-				self.output( '%s,%d|' % (result.player, result.value ) )
+				self.output( '%s\n%d\n' % (result.player, result.value ) )
 		else:
 			self.output('no song name given')
 
 application = webapp.WSGIApplication( \
 	[('/SaveScore', SaveScore), \
 	('/GetScores', GetScores), \
+	('/ShowLatestScores', ShowLatestScores), \
 	], debug=True )
 
 def main():

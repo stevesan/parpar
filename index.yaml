@@ -113,3 +113,11 @@ indexes:
     direction: desc
   - name: player
   - name: value
+
+- kind: ScoreEntry
+  properties:
+  - name: timestamp
+    direction: desc
+  - name: player
+  - name: song
+  - name: value
